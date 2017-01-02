@@ -564,3 +564,11 @@ system configuration:
 3. The target host must have access to `trace-file` at the same path
    in the filesystem as the `trace-file` path on the host system being
    passed to the qapitrace command line.
+
+# Usage sample#
+
+## dump api ##
+apitrace dump --calls=1591609-1602234 --color=never XXX.trace > XXX.txt
+## dump image ##
+glretrace  -S 5826777-5830512/fbo -s FID-1812- XXX.trace
+
