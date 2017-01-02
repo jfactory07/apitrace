@@ -153,8 +153,69 @@ void Retracer::retrace(trace::Call &call) {
             dumpCall(call);
         }
     }
+   
+    static bool bPrtNo = false;
+    if (bPrtNo)
+    printf("call.no=%d\n",call.no);
 
+#define MYPERF 0
+#if MYPERF
+    if (call.no == 2527476)
+    {
+        Map::const_iterator it = map.find("glFinish");
+	int64_t st = os::getTime();
+	(*it->second)(call);
+        st = os::getTime() - st;
+	double cpuTimeScale = 1.0E9 / os::timeFrequency;
+        st = (st) * cpuTimeScale;
+	printf("finish = %lld\n", st);
+    }
+
+    if (call.no == 2527756)
+    {
+        profilingFamseGpuTimes = 1;
+        profiling = true;
+    }
+    else if (call.no == 2527900)
+    {
+        profilingFamseGpuTimes = 2;
+        profiling = true;
+    }
+    else if (call.no == 2531177)
+    {
+        profilingFamseGpuTimes = 3;
+        profiling = true;
+    }
+
+    static int skipNo = -1;
+    if (call.no == skipNo)
+    {
+	return;
+    }
+   
+#endif
+   static int testCall = 16929;
+
+   if (call.no == testCall)
+   {
     callback(call);
+    }
+else
+    callback(call);
+
+    static bool flag = 1;
+    static int testNo = -1;
+    if (flag && 
+	( call.no == testNo  || call.no == 252582 || call.no == 252614))
+    {
+        Map::const_iterator it = map.find("glFlush");
+	(*it->second)(call);
+    }
+#if MYPERF
+    profilingFamseGpuTimes = 0;
+    profiling = 0;
+#endif
+
 }
 
 
