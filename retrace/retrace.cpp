@@ -194,14 +194,16 @@ void Retracer::retrace(trace::Call &call) {
     }
    
 #endif
-   static int testCall = 16929;
 
-   if (call.no == testCall)
-   {
-    callback(call);
+    //use --debug-begin to set the call need debug
+    if (debugCalls.contains(call.no))
+    {
+        callback(call);
     }
-else
-    callback(call);
+    else
+    {
+        callback(call);
+    }
 
     static bool flag = 1;
     static int testNo = -1;

@@ -42,6 +42,7 @@
 #include "trace_parser.hpp"
 #include "trace_profiler.hpp"
 #include "trace_dump.hpp"
+#include "trace_callset.hpp"
 
 #include "scoped_allocator.hpp"
 
@@ -112,6 +113,8 @@ extern int verbosity;
  * Debugging checks.
  */
 extern unsigned debug;
+
+extern trace::CallSet debugCalls;
 
 /**
  * Call no markers.

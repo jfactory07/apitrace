@@ -80,6 +80,8 @@ bool forceWindowed = true;
 bool dumpingState = false;
 bool dumpingSnapshots = false;
 
+trace::CallSet debugCalls;
+
 Driver driver = DRIVER_DEFAULT;
 const char *driverModule = NULL;
 
@@ -635,7 +637,8 @@ usage(const char *argv0) {
         "      --dump-format=FORMAT dump state format (`json` or `ubjson`)\n"
         "  -w, --wait              waitOnFinish on final frame\n"
         "      --loop[=N]          loop N times (N<0 continuously) replaying final frame.\n"
-        "      --singlethread      use a single thread to replay command stream\n";
+        "      --singlethread      use a single thread to replay command stream\n"
+        "      --debug-begin=CALL   debug begin at specific call no\n";
 }
 
 enum {
@@ -661,7 +664,8 @@ enum {
     SINGLETHREAD_OPT,
     SNAPSHOT_INTERVAL_OPT,
     DUMP_FORMAT_OPT,
-    MARKERS_OPT
+    MARKERS_OPT,
+    DEBUG_OPT
 };
 
 const static char *
@@ -701,6 +705,7 @@ longOptions[] = {
     {"wait", no_argument, 0, 'w'},
     {"loop", optional_argument, 0, LOOP_OPT},
     {"singlethread", no_argument, 0, SINGLETHREAD_OPT},
+    {"debug-begin", required_argument, 0, DEBUG_OPT},
     {0, 0, 0, 0}
 };
 
@@ -747,6 +752,9 @@ int main(int argc, char **argv)
             dumpingState = true;
             retrace::verbosity = -2;
             break;
+	case DEBUG_OPT:
+	    retrace::debugCalls.merge(optarg);
+ 	    break;
         case DUMP_FORMAT_OPT:
             if (strcasecmp(optarg, "json") == 0) {
                 stateWriterFactory = &createJSONStateWriter;
