@@ -54,7 +54,8 @@ void Profiler::setup(bool cpuTimes_, bool gpuTimes_, bool pixelsDrawn_, bool mem
     gpuTimes = gpuTimes_;
     pixelsDrawn = pixelsDrawn_;
     memoryUsage = memoryUsage_;
-
+    totalGpuTime = 0;
+    totalCpuTime = 0;
     std::cout << "# call no gpu_start gpu_dura cpu_start cpu_dura vsize_start vsize_dura rss_start rss_dura pixels program name" << std::endl;
 }
 
@@ -139,6 +140,8 @@ void Profiler::addCall(unsigned no,
         rssStart = 0;
         rssDuration = 0;
     }
+    totalGpuTime += gpuDuration;
+    totalCpuTime += cpuDuration;
 
     std::cout << "call"
               << " " << no
@@ -158,7 +161,9 @@ void Profiler::addCall(unsigned no,
 
 void Profiler::addFrameEnd()
 {
-    std::cout << "frame_end" << std::endl;
+    std::cout << "frame_end: gpu " << totalGpuTime << " cpu " << totalCpuTime << std::endl;
+    totalGpuTime = 0;
+    totalCpuTime = 0;
 }
 
 void Profiler::parseLine(const char* in, Profile* profile)

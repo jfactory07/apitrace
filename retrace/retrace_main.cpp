@@ -102,7 +102,7 @@ bool profilingPixelsDrawn = false;
 bool profilingMemoryUsage = false;
 bool useCallNos = true;
 bool singleThread = false;
-
+int profilingFamseGpuTimes = 0;
 unsigned frameNo = 0;
 unsigned callNo = 0;
 
@@ -239,6 +239,11 @@ retraceCall(trace::Call *call) {
 
     retracer.retrace(*call);
 
+    static bool flag = 0;
+    static int testCallNo = -1;
+    //retrace_glFlush(*call);
+    //if (flag && testCallNo == callNo)
+     
     if (doSnapshot) {
         if (!swapRenderTarget) {
             takeSnapshot(call->no);

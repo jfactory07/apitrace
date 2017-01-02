@@ -139,8 +139,11 @@ static void retrace_glXCopySubBufferMESA(trace::Call &call) {
 }
 
 static void retrace_glXSwapBuffers(trace::Call &call) {
+    static int cnt = 1;
+    static GLuint query = 0;
+    
     glws::Drawable *drawable = getDrawable(call.arg(1).toUInt());
-
+    printf("FID: %d swap buffer: %d\n", call.no, cnt++);
     frame_complete(call);
     if (retrace::doubleBuffer) {
         if (drawable) {
@@ -149,6 +152,23 @@ static void retrace_glXSwapBuffers(trace::Call &call) {
     } else {
         glFlush();
     }
+
+#if 0
+    if (retrace::profilingGpuTimes && query == 0)
+    {
+        glGenQueries(1, &query);
+        glBeginQuery(GL_TIME_ELAPSED, query);
+    }
+    else if (retrace::profilingGpuTimes && query != 0)
+    {
+        glEndQuery(GL_TIME_ELAPSED);
+        int64_t gpuDuration;
+        glGetQueryObjecti64v(query, GL_QUERY_RESULT, &gpuDuration);
+        glDeleteQueries(1, &query);
+        query = 0;
+        printf("frame gpu time = %ld\n", gpuDuration);
+    }
+#endif
 }
 
 static void retrace_glXCreateNewContext(trace::Call &call) {

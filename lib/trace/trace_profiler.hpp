@@ -133,6 +133,8 @@ private:
     int64_t minCpuTime;
     int64_t baseVsizeUsage;
     int64_t baseRssUsage;
+    int64_t totalGpuTime;
+    int64_t totalCpuTime;
 
     bool cpuTimes;
     bool gpuTimes;

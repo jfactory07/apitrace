@@ -217,11 +217,12 @@ completeCallQuery(CallQuery& query) {
     /* Get call start and duration */
     int64_t gpuStart = 0, gpuDuration = 0, cpuDuration = 0, pixels = 0, vsizeDuration = 0, rssDuration = 0;
 
-    if (query.isDraw) {
-        if (retrace::profilingGpuTimes) {
+    if (query.isDraw || retrace::profilingFamseGpuTimes == 3) {
+        if (retrace::profilingGpuTimes || retrace::profilingFamseGpuTimes == 3) {
             if (supportsTimestamp) {
+                 //jzhou
                 /* Use ARB queries in case EXT not present */
-                glGetQueryObjecti64v(query.ids[GPU_START], GL_QUERY_RESULT, &gpuStart);
+                //glGetQueryObjecti64v(query.ids[GPU_START], GL_QUERY_RESULT, &gpuStart);
                 glGetQueryObjecti64v(query.ids[GPU_DURATION], GL_QUERY_RESULT, &gpuDuration);
             } else {
                 glGetQueryObjecti64vEXT(query.ids[GPU_DURATION], GL_QUERY_RESULT, &gpuDuration);
@@ -263,10 +264,15 @@ completeCallQuery(CallQuery& query) {
 
 void
 flushQueries() {
+   static int totalCnt = 0; 
+	int cnt = 0;
     for (auto & callQuerie : callQueries) {
-        completeCallQuery(callQuerie);
+        if (callQuerie.isDraw)
+		cnt++;
+	completeCallQuery(callQuerie);
     }
-
+	totalCnt += cnt;
+    //printf("totalCnt = %d ,draw cnt = %d\n",totalCnt, cnt);
     callQueries.clear();
 }
 
@@ -307,30 +313,47 @@ beginProfile(trace::Call &call, bool isDraw) {
     query.sig = call.sig;
     query.program = currentContext ? currentContext->currentUserProgram : 0;
 
-    glGenQueries(NUM_QUERIES, query.ids);
+    if (query.program == 0)
+        query.program = currentContext ? currentContext->currentPipeline : 0;
+    if (retrace::profilingFamseGpuTimes == 1)
+    {
+        glGenQueries(NUM_QUERIES, query.ids);
+        glBeginQuery(GL_TIME_ELAPSED, query.ids[GPU_DURATION]);
+        callQueries.push_back(query);
+        retrace::profilingFamseGpuTimes = 0;
+        return;
+    }
+    
+    //glGenQueries(NUM_QUERIES, query.ids);
 
     /* GPU profiling only for draw calls */
     if (isDraw) {
+    	glGenQueries(NUM_QUERIES, query.ids);
         if (retrace::profilingGpuTimes) {
             if (supportsTimestamp) {
-                glQueryCounter(query.ids[GPU_START], GL_TIMESTAMP);
+                //jzhou
+		//glQueryCounter(query.ids[GPU_START], GL_TIMESTAMP);
             }
 
-            glBeginQuery(GL_TIME_ELAPSED, query.ids[GPU_DURATION]);
+           glBeginQuery(GL_TIME_ELAPSED, query.ids[GPU_DURATION]);
+           //glEndQuery(GL_TIME_ELAPSED);
+    	   //glDeleteQueries(NUM_QUERIES, query.ids);
+            
         }
 
         if (retrace::profilingPixelsDrawn) {
             glBeginQuery(GL_SAMPLES_PASSED, query.ids[OCCLUSION]);
         }
+    	callQueries.push_back(query);
     }
-
-    callQueries.push_back(query);
-
-    /* CPU profiling for all calls */
-    if (retrace::profilingCpuTimes) {
+        
+    //callQueries.push_back(query);
+        
+     /* CPU profiling for all calls */
+     if (retrace::profilingCpuTimes) {
         CallQuery& query = callQueries.back();
         query.cpuStart = getCurrentTime();
-    }
+       }
 
     if (retrace::profilingMemoryUsage) {
         CallQuery& query = callQueries.back();
@@ -350,11 +373,11 @@ endProfile(trace::Call &call, bool isDraw) {
         }
         return;
     }
-
-    /* CPU profiling for all calls */
-    if (retrace::profilingCpuTimes) {
-        CallQuery& query = callQueries.back();
-        query.cpuEnd = getCurrentTime();
+    if (retrace::profilingFamseGpuTimes == 2)
+    {
+        retrace::profilingFamseGpuTimes = 0;
+        glEndQuery(GL_TIME_ELAPSED);
+        return;
     }
 
     /* GPU profiling only for draw calls */
@@ -368,6 +391,11 @@ endProfile(trace::Call &call, bool isDraw) {
         }
     }
 
+    /* CPU profiling for all calls */
+    if (retrace::profilingCpuTimes) {
+           CallQuery& query = callQueries.back();
+           query.cpuEnd = getCurrentTime();
+    }
     if (retrace::profilingMemoryUsage) {
         CallQuery& query = callQueries.back();
         query.vsizeEnd = os::getVsize();
