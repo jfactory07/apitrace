@@ -187,14 +187,13 @@ void Retracer::retrace(trace::Call &call) {
         profiling = true;
     }
 
-    static int skipNo = -1;
-    if (call.no == skipNo)
-    {
-	return;
-    }
-   
 #endif
 
+    if (debug)
+    {
+	printf("call no =%d\n", call.no);
+    }
+   
     //use --debug-begin to set the call need debug
     if (debugCalls.contains(call.no))
     {
