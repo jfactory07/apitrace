@@ -191,9 +191,21 @@ void Retracer::retrace(trace::Call &call) {
 
     if (debug)
     {
-	printf("call no =%d\n", call.no);
+        printf("call no =%d\n", call.no);
     }
    
+    bool bFlush = false;
+    if (flushCalls.contains(call.no))
+    {
+        bFlush = true;
+    }
+
+    if (bFlush)
+    {
+        //before the call
+        Map::const_iterator it = map.find("glFlush");
+        (*it->second)(call);
+    }
     //use --debug-begin to set the call need debug
     if (debugCalls.contains(call.no))
     {
@@ -203,14 +215,11 @@ void Retracer::retrace(trace::Call &call) {
     {
         callback(call);
     }
-
-    static bool flag = 1;
-    static int testNo = -1;
-    if (flag && 
-	( call.no == testNo  || call.no == 252582 || call.no == 252614))
+    if (bFlush)
     {
+        //after the call
         Map::const_iterator it = map.find("glFlush");
-	(*it->second)(call);
+        (*it->second)(call);
     }
 #if MYPERF
     profilingFamseGpuTimes = 0;

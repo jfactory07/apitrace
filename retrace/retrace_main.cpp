@@ -81,6 +81,7 @@ bool dumpingState = false;
 bool dumpingSnapshots = false;
 
 trace::CallSet debugCalls;
+trace::CallSet flushCalls;
 
 Driver driver = DRIVER_DEFAULT;
 const char *driverModule = NULL;
@@ -638,7 +639,8 @@ usage(const char *argv0) {
         "  -w, --wait              waitOnFinish on final frame\n"
         "      --loop[=N]          loop N times (N<0 continuously) replaying final frame.\n"
         "      --singlethread      use a single thread to replay command stream\n"
-        "      --debug-begin=CALL   debug begin at specific call no\n";
+        "      --debug-begin=CALL   debug begin at specific call no\n"
+        "      --flush-call=CALL    add flush to the calls\n";
 }
 
 enum {
@@ -665,7 +667,8 @@ enum {
     SNAPSHOT_INTERVAL_OPT,
     DUMP_FORMAT_OPT,
     MARKERS_OPT,
-    DEBUG_OPT
+    DEBUG_OPT,
+    FLUSH_OPT
 };
 
 const static char *
@@ -706,6 +709,7 @@ longOptions[] = {
     {"loop", optional_argument, 0, LOOP_OPT},
     {"singlethread", no_argument, 0, SINGLETHREAD_OPT},
     {"debug-begin", required_argument, 0, DEBUG_OPT},
+    {"flush-call", required_argument, 0,FLUSH_OPT},
     {0, 0, 0, 0}
 };
 
@@ -752,9 +756,12 @@ int main(int argc, char **argv)
             dumpingState = true;
             retrace::verbosity = -2;
             break;
-	case DEBUG_OPT:
-	    retrace::debugCalls.merge(optarg);
- 	    break;
+        case DEBUG_OPT:
+            retrace::debugCalls.merge(optarg);
+            break;
+        case FLUSH_OPT:
+            retrace::flushCalls.merge(optarg);
+            break;
         case DUMP_FORMAT_OPT:
             if (strcasecmp(optarg, "json") == 0) {
                 stateWriterFactory = &createJSONStateWriter;
