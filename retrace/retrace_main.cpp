@@ -82,6 +82,7 @@ bool dumpingSnapshots = false;
 
 trace::CallSet debugCalls;
 trace::CallSet flushCalls;
+trace::CallSet finishCalls;
 
 Driver driver = DRIVER_DEFAULT;
 const char *driverModule = NULL;
@@ -640,7 +641,8 @@ usage(const char *argv0) {
         "      --loop[=N]          loop N times (N<0 continuously) replaying final frame.\n"
         "      --singlethread      use a single thread to replay command stream\n"
         "      --debug-begin=CALL   debug begin at specific call no\n"
-        "      --flush-call=CALL    add flush to the calls\n";
+        "      --flush-call=CALL    add flush to the calls\n"
+        "      --insert-finish=CALL    insert finish before the calls\n";
 }
 
 enum {
@@ -668,7 +670,8 @@ enum {
     DUMP_FORMAT_OPT,
     MARKERS_OPT,
     DEBUG_OPT,
-    FLUSH_OPT
+    FLUSH_OPT,
+    FINISH_OPT
 };
 
 const static char *
@@ -709,7 +712,8 @@ longOptions[] = {
     {"loop", optional_argument, 0, LOOP_OPT},
     {"singlethread", no_argument, 0, SINGLETHREAD_OPT},
     {"debug-begin", required_argument, 0, DEBUG_OPT},
-    {"flush-call", required_argument, 0,FLUSH_OPT},
+    { "flush-call", required_argument, 0,FLUSH_OPT },
+    {"insert-finish", required_argument, 0,FINISH_OPT },
     {0, 0, 0, 0}
 };
 
@@ -761,6 +765,9 @@ int main(int argc, char **argv)
             break;
         case FLUSH_OPT:
             retrace::flushCalls.merge(optarg);
+            break;
+        case FINISH_OPT:
+            retrace::finishCalls.merge(optarg);
             break;
         case DUMP_FORMAT_OPT:
             if (strcasecmp(optarg, "json") == 0) {

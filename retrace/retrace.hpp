@@ -117,6 +117,7 @@ extern unsigned debug;
 extern trace::CallSet debugCalls;
 
 extern trace::CallSet flushCalls;
+extern trace::CallSet finishCalls;
 
 /**
  * Call no markers.

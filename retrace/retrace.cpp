@@ -160,17 +160,6 @@ void Retracer::retrace(trace::Call &call) {
 
 #define MYPERF 0
 #if MYPERF
-    if (call.no == 2527476)
-    {
-        Map::const_iterator it = map.find("glFinish");
-	int64_t st = os::getTime();
-	(*it->second)(call);
-        st = os::getTime() - st;
-	double cpuTimeScale = 1.0E9 / os::timeFrequency;
-        st = (st) * cpuTimeScale;
-	printf("finish = %lld\n", st);
-    }
-
     if (call.no == 2527756)
     {
         profilingFamseGpuTimes = 1;
@@ -188,6 +177,12 @@ void Retracer::retrace(trace::Call &call) {
     }
 
 #endif
+
+    if (finishCalls.contains(call.no))
+    {
+        Map::const_iterator it = map.find("glFinish");
+        (*it->second)(call);
+    }
 
     if (debug)
     {
