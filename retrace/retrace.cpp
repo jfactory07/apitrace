@@ -154,9 +154,6 @@ void Retracer::retrace(trace::Call &call) {
         }
     }
    
-    static bool bPrtNo = false;
-    if (bPrtNo)
-    printf("call.no=%d\n",call.no);
 
 #define MYPERF 0
 #if MYPERF
@@ -177,8 +174,21 @@ void Retracer::retrace(trace::Call &call) {
     }
 
 #endif
+    if (skipFrames.contains(frameNo))
+    {
+        if ((call.flags & trace::CALL_FLAG_END_FRAME) &&
+            (call.flags & trace::CALL_FLAG_SWAP_RENDERTARGET))
+        {
+            frameNo++;
+        }
 
-    if (finishCalls.contains(call.no))
+        if ((call.flags & trace::CAAL_FLAG_NO_SKIP) == 0)
+        {
+            return;
+        }
+    }
+
+    if (finishCalls.contains(call.no, call.flags))
     {
         Map::const_iterator it = map.find("glFinish");
         (*it->second)(call);

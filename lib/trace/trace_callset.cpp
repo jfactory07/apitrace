@@ -137,6 +137,9 @@ private:
             return FREQUENCY_RENDERTARGET;
         } else if (freq == "render" || freq == "draw") {
             return FREQUENCY_RENDER;
+        }
+        else if (freq == "shader") {
+            return REQUENCY_SHADER;
         } else {
             std::cerr << "error: expected frequency, found '" << freq << "'\n";
             exit(0);

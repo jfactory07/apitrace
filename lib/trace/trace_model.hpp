@@ -541,6 +541,9 @@ enum {
     CALL_FLAG_MARKER                    = (1 << 8),
     CALL_FLAG_MARKER_PUSH               = (1 << 9),
     CALL_FLAG_MARKER_POP                = (1 << 10),
+    CALL_FLAG_SHADER_CHANGE                = (1 << 11),
+
+    CAAL_FLAG_NO_SKIP                   = (1 << 12)
 };
 
 

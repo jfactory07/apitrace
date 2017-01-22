@@ -83,6 +83,7 @@ bool dumpingSnapshots = false;
 trace::CallSet debugCalls;
 trace::CallSet flushCalls;
 trace::CallSet finishCalls;
+trace::CallSet skipFrames;
 
 Driver driver = DRIVER_DEFAULT;
 const char *driverModule = NULL;
@@ -605,7 +606,7 @@ mainLoop() {
 
 static void
 usage(const char *argv0) {
-    std::cout << 
+    std::cout <<
         "Usage: " << argv0 << " [OPTION] TRACE [...]\n"
         "Replay TRACE.\n"
         "\n"
@@ -642,7 +643,8 @@ usage(const char *argv0) {
         "      --singlethread      use a single thread to replay command stream\n"
         "      --debug-begin=CALL   debug begin at specific call no\n"
         "      --flush-call=CALL    add flush to the calls\n"
-        "      --insert-finish=CALL    insert finish before the calls\n";
+        "      --insert-finish=CALL    insert finish before the calls\n"
+        "      --skip-frames=FRAME    skip the frames\n";
 }
 
 enum {
@@ -671,7 +673,8 @@ enum {
     MARKERS_OPT,
     DEBUG_OPT,
     FLUSH_OPT,
-    FINISH_OPT
+    FINISH_OPT,
+    SKIP_FRAME_OPT
 };
 
 const static char *
@@ -713,7 +716,8 @@ longOptions[] = {
     {"singlethread", no_argument, 0, SINGLETHREAD_OPT},
     {"debug-begin", required_argument, 0, DEBUG_OPT},
     { "flush-call", required_argument, 0,FLUSH_OPT },
-    {"insert-finish", required_argument, 0,FINISH_OPT },
+    { "insert-finish", required_argument, 0,FINISH_OPT },
+    {"skip-frames", required_argument, 0,SKIP_FRAME_OPT },
     {0, 0, 0, 0}
 };
 
@@ -768,6 +772,9 @@ int main(int argc, char **argv)
             break;
         case FINISH_OPT:
             retrace::finishCalls.merge(optarg);
+            break;
+        case SKIP_FRAME_OPT:
+            retrace::skipFrames.merge(optarg);
             break;
         case DUMP_FORMAT_OPT:
             if (strcasecmp(optarg, "json") == 0) {

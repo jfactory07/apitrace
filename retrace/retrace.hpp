@@ -118,6 +118,7 @@ extern trace::CallSet debugCalls;
 
 extern trace::CallSet flushCalls;
 extern trace::CallSet finishCalls;
+extern trace::CallSet skipFrames;
 
 /**
  * Call no markers.
@@ -212,9 +213,11 @@ class Retracer
 
     std::vector<Callback> callbacks;
 
+    int         frame;
 public:
     Retracer() {
         addCallbacks(stdc_callbacks);
+        frame = 0;
     }
 
     virtual ~Retracer() {}
