@@ -174,6 +174,7 @@ void Retracer::retrace(trace::Call &call) {
     }
 
 #endif
+    //--skip-frames
     if (skipFrames.contains(frameNo))
     {
         if ((call.flags & trace::CALL_FLAG_END_FRAME) &&
@@ -188,11 +189,13 @@ void Retracer::retrace(trace::Call &call) {
         }
     }
 
+    //--skip-calls
     if (skipCalls.contains(call.no) && (call.flags & trace::CAAL_FLAG_NO_SKIP) == 0)
     {
         return;
     }
 
+    // --insert-finish
     if (finishCalls.contains(call.no, call.flags))
     {
         Map::const_iterator it = map.find("glFinish");
@@ -203,19 +206,14 @@ void Retracer::retrace(trace::Call &call) {
     {
         printf("call no =%d\n", call.no);
     }
-   
-    bool bFlush = false;
+
+    // --flush-call
     if (flushCalls.contains(call.no))
     {
-        bFlush = true;
-    }
-
-    if (bFlush)
-    {
-        //before the call
         Map::const_iterator it = map.find("glFlush");
         (*it->second)(call);
     }
+
     //use --debug-begin to set the call need debug
     if (debugCalls.contains(call.no))
     {
@@ -225,12 +223,7 @@ void Retracer::retrace(trace::Call &call) {
     {
         callback(call);
     }
-    if (bFlush)
-    {
-        //after the call
-        Map::const_iterator it = map.find("glFlush");
-        (*it->second)(call);
-    }
+
 #if MYPERF
     profilingFamseGpuTimes = 0;
     profiling = 0;
