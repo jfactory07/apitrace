@@ -188,6 +188,11 @@ void Retracer::retrace(trace::Call &call) {
         }
     }
 
+    if (skipCalls.contains(call.no) && (call.flags & trace::CAAL_FLAG_NO_SKIP) == 0)
+    {
+        return;
+    }
+
     if (finishCalls.contains(call.no, call.flags))
     {
         Map::const_iterator it = map.find("glFinish");

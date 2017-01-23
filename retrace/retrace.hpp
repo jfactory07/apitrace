@@ -119,6 +119,7 @@ extern trace::CallSet debugCalls;
 extern trace::CallSet flushCalls;
 extern trace::CallSet finishCalls;
 extern trace::CallSet skipFrames;
+extern trace::CallSet skipCalls;
 
 /**
  * Call no markers.

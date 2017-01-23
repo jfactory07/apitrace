@@ -84,6 +84,7 @@ trace::CallSet debugCalls;
 trace::CallSet flushCalls;
 trace::CallSet finishCalls;
 trace::CallSet skipFrames;
+trace::CallSet skipCalls;
 
 Driver driver = DRIVER_DEFAULT;
 const char *driverModule = NULL;
@@ -644,7 +645,8 @@ usage(const char *argv0) {
         "      --debug-begin=CALL   debug begin at specific call no\n"
         "      --flush-call=CALL    add flush to the calls\n"
         "      --insert-finish=CALL    insert finish before the calls\n"
-        "      --skip-frames=FRAME    skip the frames\n";
+        "      --skip-frames=FRAME    skip the frames\n"
+        "      --skip-calls=CALL      skip the calls\n";
 }
 
 enum {
@@ -674,7 +676,8 @@ enum {
     DEBUG_OPT,
     FLUSH_OPT,
     FINISH_OPT,
-    SKIP_FRAME_OPT
+    SKIP_FRAME_OPT,
+    SKIP_CALL_OPT
 };
 
 const static char *
@@ -717,7 +720,8 @@ longOptions[] = {
     {"debug-begin", required_argument, 0, DEBUG_OPT},
     { "flush-call", required_argument, 0,FLUSH_OPT },
     { "insert-finish", required_argument, 0,FINISH_OPT },
-    {"skip-frames", required_argument, 0,SKIP_FRAME_OPT },
+    { "skip-frames", required_argument, 0,SKIP_FRAME_OPT },
+    {"skip-calls", required_argument, 0,SKIP_CALL_OPT },
     {0, 0, 0, 0}
 };
 
@@ -775,6 +779,9 @@ int main(int argc, char **argv)
             break;
         case SKIP_FRAME_OPT:
             retrace::skipFrames.merge(optarg);
+            break;
+        case SKIP_CALL_OPT:
+            retrace::skipCalls.merge(optarg);
             break;
         case DUMP_FORMAT_OPT:
             if (strcasecmp(optarg, "json") == 0) {
