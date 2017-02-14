@@ -229,6 +229,9 @@ command(int argc, char *argv[])
         dumper = std::make_unique<trace::Dumper>(std::cout, dumpFlags);
     }
 
+    int lastCallno = calls.getLast();
+   // printf("lastCallno=%d\n", lastCallno);
+
     for (int i = optind; i < argc; ++i) {
         trace::Parser p;
 
@@ -242,8 +245,13 @@ command(int argc, char *argv[])
                 if (verbose ||
                     !(call->flags & trace::CALL_FLAG_VERBOSE)) {
                     dumper->visit(call);
+		  
                 }
             }
+	    else if (call->no > lastCallno)
+	    {
+		return 0;
+	    }
             delete call;
         }
     }

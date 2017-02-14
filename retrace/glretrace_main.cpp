@@ -267,8 +267,8 @@ flushQueries() {
    static int totalCnt = 0; 
 	int cnt = 0;
     for (auto & callQuerie : callQueries) {
-        if (callQuerie.isDraw)
-		cnt++;
+        //if (callQuerie.isDraw)
+	//	cnt++;
 	completeCallQuery(callQuerie);
     }
 	totalCnt += cnt;
@@ -344,10 +344,11 @@ beginProfile(trace::Call &call, bool isDraw) {
         if (retrace::profilingPixelsDrawn) {
             glBeginQuery(GL_SAMPLES_PASSED, query.ids[OCCLUSION]);
         }
-    	callQueries.push_back(query);
+    	//callQueries.push_back(query);
     }
-        
-    //callQueries.push_back(query);
+       
+    if (isDraw || retrace::profilingCpuTimes) 
+    	callQueries.push_back(query);
         
      /* CPU profiling for all calls */
      if (retrace::profilingCpuTimes) {
